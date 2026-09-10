@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+
 plugins {
     java
     id("org.springframework.boot") version "4.1.1"
@@ -31,4 +33,18 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register<BootRun>("bootRunDev") {
+    group = "application"
+    description = "Runs application with the dev Spring profile"
+
+    classpath = sourceSets["main"].runtimeClasspath
+
+    mainClass.set(
+        tasks.named<BootRun>("bootRun")
+            .flatMap { it.mainClass }
+    )
+
+    args("--spring.profiles.active=dev")
 }
