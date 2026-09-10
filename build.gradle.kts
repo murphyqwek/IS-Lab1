@@ -48,3 +48,17 @@ tasks.register<BootRun>("bootRunDev") {
 
     args("--spring.profiles.active=dev")
 }
+
+tasks.register<Exec>("dockerComposeUp") {
+    group = "infrastructre"
+    description = "Run docker compose up to run a container with postgresql"
+    workingDir(projectDir)
+    commandLine("docker", "compose", "up", "-d")
+}
+
+tasks.register<Exec>("dockerComposeDown") {
+    group = "infrastructre"
+    description = "Run docker compose down to run down a container with postgresql"
+    workingDir(projectDir)
+    commandLine("docker", "compose", "down")
+}
