@@ -20,19 +20,18 @@ public class TicketService {
     }
 
     @Transactional
-    public void save(TicketRequest ticket) {
+    public TicketResponse save(TicketRequest ticket) {
         var ticketEntity = ticketMapper.toEntity(ticket);
-        ticketRepository.save(ticketEntity);
+        return ticketMapper.toResponse(ticketRepository.save(ticketEntity));
     }
 
     @Transactional
     public TicketResponse getById(Integer id) {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Ticket with id " + id + " not found"
-                        )
-                );
+        Ticket ticket = ticketRepository.findById(id).orElse(null);
+
+        if(ticket == null) {
+            return null;
+        }
 
         return ticketMapper.toResponse(ticket);
     }
