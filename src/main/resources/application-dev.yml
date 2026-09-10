@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/studs
-    username: postgres
-    password: postgres
+    username: myuser
+    password: mypassword
 
   jpa:
     hibernate:
