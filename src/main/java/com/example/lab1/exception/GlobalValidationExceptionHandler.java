@@ -1,4 +1,4 @@
-package com.example.lab1.handlers.validation;
+package com.example.lab1.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

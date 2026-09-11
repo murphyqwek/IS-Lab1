@@ -3,36 +3,105 @@ package com.example.lab1.service;
 import com.example.lab1.dto.request.TicketRequest;
 import com.example.lab1.dto.response.TicketResponse;
 import com.example.lab1.entity.Ticket;
+import com.example.lab1.exception.ResourceNotFoundException;
 import com.example.lab1.mapper.TicketMapper;
 import com.example.lab1.repository.TicketRepository;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Service
 public class TicketService {
+
     private final TicketRepository ticketRepository;
+    private final CoordinatesService coordinatesService;
+    private final PersonService personService;
+    private final EventService eventService;
+    private final VenueService venueService;
     private final TicketMapper ticketMapper;
 
-    public TicketService(TicketRepository ticketRepository, TicketMapper ticketMapper) {
+    public TicketService(
+            TicketRepository ticketRepository,
+            CoordinatesService coordinatesService,
+            PersonService personService,
+            EventService eventService,
+            VenueService venueService,
+            TicketMapper ticketMapper
+    ) {
         this.ticketRepository = ticketRepository;
+        this.coordinatesService = coordinatesService;
+        this.personService = personService;
+        this.eventService = eventService;
+        this.venueService = venueService;
         this.ticketMapper = ticketMapper;
     }
 
-    @Transactional
-    public TicketResponse save(TicketRequest ticket) {
-        var ticketEntity = ticketMapper.toEntity(ticket);
-        return ticketMapper.toResponse(ticketRepository.save(ticketEntity));
+    @Transactional(readOnly = true)
+    public TicketResponse getById(Integer id) {
+        return ticketMapper.toResponse(find(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TicketResponse> getAll(Pageable pageable) {
+        return ticketRepository.findAll(pageable)
+                .map(ticketMapper::toResponse);
     }
 
     @Transactional
-    public TicketResponse getById(Integer id) {
-        Ticket ticket = ticketRepository.findById(id).orElse(null);
+    public TicketResponse create(TicketRequest request) {
+        Ticket ticket = new Ticket();
+        applyRequest(ticket, request);
 
-        if(ticket == null) {
-            return null;
-        }
+        ticketRepository.save(ticket);
 
         return ticketMapper.toResponse(ticket);
+    }
+
+    @Transactional
+    public TicketResponse update(Integer id, TicketRequest request) {
+        Ticket ticket = find(id);
+
+        applyRequest(ticket, request);
+
+        // save() не нужен: ticket managed, Hibernate применит dirty checking.
+        return ticketMapper.toResponse(ticket);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        ticketRepository.delete(find(id));
+    }
+
+    private void applyRequest(Ticket ticket, TicketRequest request) {
+        ticket.setName(request.name());
+        ticket.setCoordinates(coordinatesService.resolve(request.coordinates()));
+        ticket.setEvent(eventService.resolve(request.event()));
+
+        ticket.setPerson(
+                request.person() == null
+                        ? null
+                        : personService.resolve(request.person())
+        );
+
+        ticket.setVenue(
+                request.venue() == null
+                        ? null
+                        : venueService.resolve(request.venue())
+        );
+
+        ticket.setPrice(request.price());
+        ticket.setType(request.ticketType());
+        ticket.setDiscount(request.discount());
+        ticket.setNumber(request.number());
+    }
+
+    private Ticket find(Integer id) {
+        return ticketRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Ticket с id=" + id + " не найден"
+                        )
+                );
     }
 }

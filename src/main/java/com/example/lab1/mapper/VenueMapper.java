@@ -7,23 +7,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VenueMapper {
-    public Venue toEntity(VenueRequest request) {
-        if (request == null) {
-            return null;
-        }
-        Venue venue = new Venue();
 
+    public Venue toEntity(VenueRequest request) {
+        Venue venue = new Venue();
         venue.setName(request.name());
         venue.setCapacity(request.capacity());
         venue.setType(request.venueType());
-
         return venue;
     }
 
     public VenueResponse toResponse(Venue venue) {
-        if (venue == null) {
-            return null;
-        }
-        return new VenueResponse(venue.getId(), venue.getName(), venue.getCapacity(), venue.getType());
+        return new VenueResponse(
+                venue.getId(),
+                venue.getName(),
+                venue.getCapacity(),
+                venue.getType()
+        );
     }
 }

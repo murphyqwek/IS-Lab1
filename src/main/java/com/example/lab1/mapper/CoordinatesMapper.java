@@ -7,22 +7,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CoordinatesMapper {
-    public Coordinates toEntity(CoordinatesRequest coordinates) {
-        if (coordinates == null) {
-            return null;
-        }
-        var coordinatesEntity = new Coordinates();
 
-        coordinatesEntity.setX(coordinates.x());
-        coordinatesEntity.setY(coordinates.y());
-
-        return coordinatesEntity;
+    public Coordinates toEntity(CoordinatesRequest request) {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setX(request.x());
+        coordinates.setY(request.y());
+        return coordinates;
     }
 
     public CoordinatesResponse toResponse(Coordinates coordinates) {
-        if (coordinates == null) {
-            return null;
-        }
-        return new CoordinatesResponse(coordinates.getId(), coordinates.getX(),  coordinates.getY());
+        return new CoordinatesResponse(
+                coordinates.getId(),
+                coordinates.getX(),
+                coordinates.getY()
+        );
     }
 }

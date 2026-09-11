@@ -1,4 +1,4 @@
-package com.example.lab1.handlers.validation;
+package com.example.lab1.exception;
 
 import java.time.LocalDateTime;
 import java.util.Map;

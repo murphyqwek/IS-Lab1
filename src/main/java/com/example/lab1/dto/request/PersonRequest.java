@@ -8,8 +8,13 @@ import jakarta.validation.constraints.Positive;
 public record PersonRequest(
         Color eyeColor,
         Color hairColor,
-        @Valid LocationRequest locationRequest,
-        @Positive(message = "Поле weight должно быть положительным числом") Float weight,
+
+        @Valid
+        LocationReferenceRequest location,
+
+        @Positive(message = "Поле weight должно быть положительным числом")
+        Float weight,
+
         Country nationality
 ) {
 }

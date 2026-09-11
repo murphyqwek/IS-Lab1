@@ -7,26 +7,23 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocationMapper {
-    public Location toEntity(LocationRequest location) {
-        if(location == null) {
-            return null;
-        }
 
-        var entity = new Location();
-
-        entity.setName(location.name());
-        entity.setX(location.x());
-        entity.setY(location.y());
-        entity.setZ(location.z());
-
-        return entity;
+    public Location toEntity(LocationRequest request) {
+        Location location = new Location();
+        location.setX(request.x());
+        location.setY(request.y());
+        location.setZ(request.z());
+        location.setName(request.name());
+        return location;
     }
 
     public LocationResponse toResponse(Location location) {
-        if(location == null) {
-            return null;
-        }
-
-        return new LocationResponse(location.getId(), location.getX(), location.getY(), location.getZ(), location.getName());
+        return new LocationResponse(
+                location.getId(),
+                location.getX(),
+                location.getY(),
+                location.getZ(),
+                location.getName()
+        );
     }
 }
