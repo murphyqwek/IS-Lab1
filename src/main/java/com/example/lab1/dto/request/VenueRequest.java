@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record VenueRequest(
-     @NotNull @NotBlank String name,
-     @NotNull @Positive Integer capacity,
+     @NotNull(message = "Поле name не может быть пустым") @NotBlank(message = "Поле name не может быть пустым") String name,
+     @NotNull(message = "Поле capacity не может быть пустым") @Positive(message = "Поле capacity может быть только положительным числом") Integer capacity,
      VenueType venueType
 ) {
 

@@ -9,7 +9,7 @@ public record PersonRequest(
         Color eyeColor,
         Color hairColor,
         @Valid LocationRequest locationRequest,
-        @Positive Float weight,
+        @Positive(message = "Поле weight должно быть положительным числом") Float weight,
         Country nationality
 ) {
 }

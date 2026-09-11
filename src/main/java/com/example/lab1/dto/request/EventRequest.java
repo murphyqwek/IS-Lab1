@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record EventRequest(
-        @NotNull @NotBlank String name,
-        @NotNull String description,
+        @NotNull(message = "Поле name не может быть пустым") @NotBlank(message = "Поле name не может быть пустым") String name,
+        @NotNull(message = "Поле description не может быть пустым") String description,
         EventType eventType
 ) {
 }

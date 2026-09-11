@@ -5,14 +5,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 public record TicketRequest(
-        @NotNull @NotBlank String name,
-        @NotNull @Valid CoordinatesRequest coordinatesRequest,
+        @NotNull(message = "Поле name не может быть пустым") @NotBlank(message = "Поле name не может быть пустым") String name,
+        @NotNull(message = "Поле coordinates не может быть пустым") @Valid CoordinatesRequest coordinatesRequest,
         @Valid PersonRequest personRequest,
-        @NotNull @Valid EventRequest eventRequest,
-        @Positive @NotNull Integer price,
+        @NotNull(message = "Поле event не может быть пустым") @Valid EventRequest eventRequest,
+        @Positive(message = "Поле price должно быть положительным числом") @NotNull(message = "Поле price не может быть пустым") Integer price,
         TicketType ticketType,
-        @Min(1) @Max(100) @NotNull Integer discount,
-        @Positive Float number,
+        @Min(value = 1, message = "Discount может быть в пределах от 1 до 100") @Max(value = 100, message = "Discount может быть в пределах от 1 до 100") @NotNull(message = "Поле discount не может быть пустым") Integer discount,
+        @Positive(message = "Поле number не может быть пустым") Float number,
         @Valid VenueRequest venueRequest
 ) {
 }
