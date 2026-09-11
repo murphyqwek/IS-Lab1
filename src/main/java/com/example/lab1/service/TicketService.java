@@ -1,13 +1,19 @@
 package com.example.lab1.service;
 
+import com.example.lab1.dto.filter.TicketFilter;
+import com.example.lab1.dto.filter.TicketSortField;
 import com.example.lab1.dto.request.TicketRequest;
 import com.example.lab1.dto.response.TicketResponse;
 import com.example.lab1.entity.Ticket;
 import com.example.lab1.exception.ResourceNotFoundException;
 import com.example.lab1.mapper.TicketMapper;
 import com.example.lab1.repository.TicketRepository;
+import com.example.lab1.specification.TicketSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +42,46 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TicketResponse> getAll(Pageable pageable) {
-        return ticketRepository.findAll(pageable)
-                .map(ticketMapper::toResponse);
+    public Page<TicketResponse> getAll(TicketFilter filter, int page, int size, TicketSortField sortBy, Sort.Direction direction) {
+        Specification<Ticket> specification = Specification.unrestricted();
+
+        if (filter.name() != null && !filter.name().isBlank()) {
+            specification = specification.and(
+                    TicketSpecification.nameEquals(
+                            filter.name()
+                    )
+            );
+        }
+
+        if (filter.eventName() != null && !filter.eventName().isBlank()) {
+            specification = specification.and(
+                    TicketSpecification.eventNameEquals(
+                            filter.eventName()
+                    )
+            );
+        }
+
+        if (filter.eventDescription() != null && !filter.eventDescription().isBlank()) {
+            specification = specification.and(
+                    TicketSpecification.eventDescriptionEquals(
+                            filter.eventDescription()
+                    )
+            );
+        }
+
+        if (filter.venueName() != null && !filter.venueName().isBlank()) {
+            specification = specification.and(
+                    TicketSpecification.venueNameEquals(
+                            filter.venueName()
+                    )
+            );
+        }
+
+        Sort sort = Sort.by(direction, sortBy.getProperty());
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return ticketRepository.findAll(specification, pageable).map(ticketMapper::toResponse);
     }
 
     @Transactional
