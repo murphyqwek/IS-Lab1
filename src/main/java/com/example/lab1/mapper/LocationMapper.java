@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocationMapper {
     public Location toEntity(LocationRequest location) {
+        if(location == null) {
+            return null;
+        }
+
         var entity = new Location();
 
         entity.setName(location.name());
@@ -19,6 +23,10 @@ public class LocationMapper {
     }
 
     public LocationResponse toResponse(Location location) {
+        if(location == null) {
+            return null;
+        }
+
         return new LocationResponse(location.getId(), location.getX(), location.getY(), location.getZ(), location.getName());
     }
 }

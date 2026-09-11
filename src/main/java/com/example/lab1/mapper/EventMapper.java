@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventMapper {
     public Event toEntity(EventRequest request) {
+        if (request == null) {
+            return null;
+        }
         var event = new Event();
 
         event.setEventType(request.eventType());
@@ -20,6 +23,9 @@ public class EventMapper {
     }
 
     public EventResponse toResponse(Event event) {
+        if (event == null) {
+            return null;
+        }
         return new EventResponse(event.getId(), event.getName(), event.getDescription(), event.getEventType());
     }
 }

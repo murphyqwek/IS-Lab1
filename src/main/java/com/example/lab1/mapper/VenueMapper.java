@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class VenueMapper {
     public Venue toEntity(VenueRequest request) {
+        if (request == null) {
+            return null;
+        }
         Venue venue = new Venue();
 
         venue.setName(request.name());
@@ -18,6 +21,9 @@ public class VenueMapper {
     }
 
     public VenueResponse toResponse(Venue venue) {
+        if (venue == null) {
+            return null;
+        }
         return new VenueResponse(venue.getId(), venue.getName(), venue.getCapacity(), venue.getType());
     }
 }
