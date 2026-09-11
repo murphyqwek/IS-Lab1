@@ -1,11 +1,14 @@
 package com.example.lab1.controller;
 
+import com.example.lab1.dto.filter.TicketFilter;
+import com.example.lab1.dto.filter.TicketSortField;
 import com.example.lab1.dto.request.TicketRequest;
 import com.example.lab1.dto.response.TicketResponse;
 import com.example.lab1.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +29,22 @@ public class TicketController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<TicketResponse>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(ticketService.getAll(pageable));
+    public ResponseEntity<Page<TicketResponse>> getAll(
+            TicketFilter filter,
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "0")
+            int size,
+
+            @RequestParam(defaultValue = "NAME")
+            TicketSortField sortBy,
+
+            @RequestParam(defaultValue = "ASC")
+            Sort.Direction direction
+    ) {
+        return ResponseEntity.ok(ticketService.getAll(filter, page, size, sortBy, direction));
     }
 
     @PostMapping
