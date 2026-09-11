@@ -22,12 +22,7 @@ public class PersonService {
     private final LocationService locationService;
     private final PersonMapper mapper;
 
-    public PersonService(
-            PersonRepository repository,
-            TicketRepository ticketRepository,
-            LocationService locationService,
-            PersonMapper mapper
-    ) {
+    public PersonService(PersonRepository repository, TicketRepository ticketRepository, LocationService locationService, PersonMapper mapper) {
         this.repository = repository;
         this.ticketRepository = ticketRepository;
         this.locationService = locationService;

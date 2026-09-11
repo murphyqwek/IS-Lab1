@@ -20,11 +20,7 @@ public class VenueService {
     private final TicketRepository ticketRepository;
     private final VenueMapper mapper;
 
-    public VenueService(
-            VenueRepository repository,
-            TicketRepository ticketRepository,
-            VenueMapper mapper
-    ) {
+    public VenueService(VenueRepository repository, TicketRepository ticketRepository, VenueMapper mapper) {
         this.repository = repository;
         this.ticketRepository = ticketRepository;
         this.mapper = mapper;

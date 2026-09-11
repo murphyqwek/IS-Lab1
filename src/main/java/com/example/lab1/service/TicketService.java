@@ -21,14 +21,7 @@ public class TicketService {
     private final VenueService venueService;
     private final TicketMapper ticketMapper;
 
-    public TicketService(
-            TicketRepository ticketRepository,
-            CoordinatesService coordinatesService,
-            PersonService personService,
-            EventService eventService,
-            VenueService venueService,
-            TicketMapper ticketMapper
-    ) {
+    public TicketService(TicketRepository ticketRepository, CoordinatesService coordinatesService, PersonService personService, EventService eventService, VenueService venueService, TicketMapper ticketMapper) {
         this.ticketRepository = ticketRepository;
         this.coordinatesService = coordinatesService;
         this.personService = personService;

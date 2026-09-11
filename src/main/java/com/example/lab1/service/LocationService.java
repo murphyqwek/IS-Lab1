@@ -20,11 +20,7 @@ public class LocationService {
     private final PersonRepository personRepository;
     private final LocationMapper mapper;
 
-    public LocationService(
-            LocationRepository repository,
-            PersonRepository personRepository,
-            LocationMapper mapper
-    ) {
+    public LocationService(LocationRepository repository, PersonRepository personRepository, LocationMapper mapper) {
         this.repository = repository;
         this.personRepository = personRepository;
         this.mapper = mapper;

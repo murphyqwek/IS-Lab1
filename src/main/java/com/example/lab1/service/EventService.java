@@ -20,11 +20,7 @@ public class EventService {
     private final TicketRepository ticketRepository;
     private final EventMapper mapper;
 
-    public EventService(
-            EventRepository repository,
-            TicketRepository ticketRepository,
-            EventMapper mapper
-    ) {
+    public EventService(EventRepository repository, TicketRepository ticketRepository, EventMapper mapper) {
         this.repository = repository;
         this.ticketRepository = ticketRepository;
         this.mapper = mapper;
@@ -32,9 +28,7 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<EventResponse> getAll() {
-        return repository.findAll().stream()
-                .map(mapper::toResponse)
-                .toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)

@@ -32,9 +32,7 @@ public class CoordinatesService {
 
     @Transactional(readOnly = true)
     public List<CoordinatesResponse> getAll() {
-        return repository.findAll().stream()
-                .map(mapper::toResponse)
-                .toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -80,9 +78,7 @@ public class CoordinatesService {
                 "coordinates"
         );
 
-        return request.id() != null
-                ? find(request.id())
-                : createEntity(request.newObject());
+        return request.id() != null ? find(request.id()) : createEntity(request.newObject());
     }
 
     private Coordinates createEntity(CoordinatesRequest request) {
