@@ -31,26 +31,18 @@ public class LocationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public LocationResponse create(
-            @Valid @RequestBody LocationRequest request
-    ) {
+    public LocationResponse create(@Valid @RequestBody LocationRequest request) {
         return service.create(request);
     }
 
     @PutMapping("/{id}")
-    public LocationResponse update(
-            @PathVariable Long id,
-            @Valid @RequestBody LocationRequest request
-    ) {
+    public LocationResponse update(@PathVariable Long id, @Valid @RequestBody LocationRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable Long id,
-            @RequestParam(required = false) Long replacementId
-    ) {
+    public void delete(@PathVariable Long id, @RequestParam(required = false) Long replacementId) {
         service.delete(id, replacementId);
     }
 }

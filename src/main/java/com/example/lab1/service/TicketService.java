@@ -12,9 +12,8 @@ import com.example.lab1.mapper.VenueMapper;
 import com.example.lab1.repository.TicketRepository;
 import com.example.lab1.specification.TicketSpecification;
 import com.example.lab1.websocket.ChangeType;
-import com.example.lab1.websocket.EntityChangedEvent;
+import com.example.lab1.websocket.EntityChangePublisher;
 import com.example.lab1.websocket.EntityType;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,7 @@ public class TicketService {
     private final VenueService venueService;
     private final TicketMapper ticketMapper;
     private final VenueMapper venueMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    private final EntityChangePublisher changePublisher;
 
     public TicketService(
             TicketRepository ticketRepository,
@@ -45,7 +44,7 @@ public class TicketService {
             VenueService venueService,
             TicketMapper ticketMapper,
             VenueMapper venueMapper,
-            ApplicationEventPublisher eventPublisher
+            EntityChangePublisher changePublisher
     ) {
         this.ticketRepository = ticketRepository;
         this.coordinatesService = coordinatesService;
@@ -54,7 +53,7 @@ public class TicketService {
         this.venueService = venueService;
         this.ticketMapper = ticketMapper;
         this.venueMapper = venueMapper;
-        this.eventPublisher = eventPublisher;
+        this.changePublisher = changePublisher;
     }
 
     @Transactional(readOnly = true)
@@ -75,28 +74,19 @@ public class TicketService {
     @Transactional
     public TicketResponse copyAsVip(int ticketId) {
         Ticket ticket = ticketRepository.copyAsVip(ticketId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Ticket с id=" + ticketId + " не найден"
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket с id=" + ticketId + " не найден"));
 
-        publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
+        changePublisher.publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
 
         return ticketMapper.toResponse(ticket);
     }
 
     @Transactional
     public TicketResponse copyWithDiscount(int ticketId, int discount) {
-        Ticket ticket = ticketRepository
-                .copyWithDiscount(ticketId, discount)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Ticket с id=" + ticketId + " не найден"
-                        )
-                );
+        Ticket ticket = ticketRepository.copyWithDiscount(ticketId, discount)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket с id=" + ticketId + " не найден"));
 
-        publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
+        changePublisher.publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
 
         return ticketMapper.toResponse(ticket);
     }
@@ -107,7 +97,13 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TicketResponse> getAll(TicketFilter filter, int page, int size, TicketSortField sortBy, Sort.Direction direction) {
+    public Page<TicketResponse> getAll(
+            TicketFilter filter,
+            int page,
+            int size,
+            TicketSortField sortBy,
+            Sort.Direction direction
+    ) {
         Specification<Ticket> specification = Specification.unrestricted();
 
         if (filter.name() != null && !filter.name().isBlank()) {
@@ -115,7 +111,6 @@ public class TicketService {
         }
 
         if (filter.eventName() != null && !filter.eventName().isBlank()) {
-
             specification = specification.and(TicketSpecification.eventNameEquals(filter.eventName()));
         }
 
@@ -128,7 +123,6 @@ public class TicketService {
         }
 
         Sort sort = Sort.by(direction, sortBy.getProperty());
-
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return ticketRepository.findAll(specification, pageable).map(ticketMapper::toResponse);
@@ -142,7 +136,7 @@ public class TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        publish(EntityType.TICKET, ChangeType.CREATED, savedTicket.getId());
+        changePublisher.publish(EntityType.TICKET, ChangeType.CREATED, savedTicket.getId());
 
         return ticketMapper.toResponse(savedTicket);
     }
@@ -153,7 +147,7 @@ public class TicketService {
 
         applyRequest(ticket, request);
 
-        publish(EntityType.TICKET, ChangeType.UPDATED, ticket.getId());
+        changePublisher.publish(EntityType.TICKET, ChangeType.UPDATED, ticket.getId());
 
         return ticketMapper.toResponse(ticket);
     }
@@ -164,20 +158,15 @@ public class TicketService {
 
         ticketRepository.delete(ticket);
 
-        publish(EntityType.TICKET, ChangeType.DELETED, id);
+        changePublisher.publish(EntityType.TICKET, ChangeType.DELETED, id);
     }
 
     private void applyRequest(Ticket ticket, TicketRequest request) {
         ticket.setName(request.name());
-
         ticket.setCoordinates(coordinatesService.resolve(request.coordinates()));
-
         ticket.setEvent(eventService.resolve(request.event()));
-
         ticket.setPerson(request.person() == null ? null : personService.resolve(request.person()));
-
         ticket.setVenue(request.venue() == null ? null : venueService.resolve(request.venue()));
-
         ticket.setPrice(request.price());
         ticket.setType(request.ticketType());
         ticket.setDiscount(request.discount());
@@ -186,14 +175,6 @@ public class TicketService {
 
     private Ticket find(Integer id) {
         return ticketRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Ticket с id=" + id +" не найден"
-                        )
-                );
-    }
-
-    private void publish(EntityType entityType, ChangeType changeType, Integer id) {
-        eventPublisher.publishEvent(new EntityChangedEvent(entityType, changeType, id));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket с id=" + id + " не найден"));
     }
 }

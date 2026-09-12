@@ -31,26 +31,18 @@ public class CoordinatesController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CoordinatesResponse create(
-            @Valid @RequestBody CoordinatesRequest request
-    ) {
+    public CoordinatesResponse create(@Valid @RequestBody CoordinatesRequest request) {
         return service.create(request);
     }
 
     @PutMapping("/{id}")
-    public CoordinatesResponse update(
-            @PathVariable Long id,
-            @Valid @RequestBody CoordinatesRequest request
-    ) {
+    public CoordinatesResponse update(@PathVariable Long id, @Valid @RequestBody CoordinatesRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable Long id,
-            @RequestParam(required = false) Long replacementId
-    ) {
+    public void delete(@PathVariable Long id, @RequestParam(required = false) Long replacementId) {
         service.delete(id, replacementId);
     }
 }

@@ -33,28 +33,17 @@ public class TicketController {
     @GetMapping
     public ResponseEntity<Page<TicketResponse>> getAll(
             TicketFilter filter,
-
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "0")
-            int size,
-
-            @RequestParam(defaultValue = "NAME")
-            TicketSortField sortBy,
-
-            @RequestParam(defaultValue = "ASC")
-            Sort.Direction direction
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "NAME") TicketSortField sortBy,
+            @RequestParam(defaultValue = "ASC") Sort.Direction direction
     ) {
         return ResponseEntity.ok(ticketService.getAll(filter, page, size, sortBy, direction));
     }
 
     @PostMapping
-    public ResponseEntity<TicketResponse> create(
-            @Valid @RequestBody TicketRequest request
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ticketService.create(request));
+    public ResponseEntity<TicketResponse> create(@Valid @RequestBody TicketRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.create(request));
     }
 
     @PutMapping("/{id}")
@@ -74,61 +63,29 @@ public class TicketController {
     @GetMapping("/max-type")
     public ResponseEntity<TicketResponse> getWithMaxType() {
         var ticket = ticketService.getTicketWithMaxType();
-
-        if (ticket == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(ticket);
+        return ticket == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(ticket);
     }
-
 
     @GetMapping("/venue-less-than/{venueId}/count")
-    public ResponseEntity<Long> countWithVenueLessThan(
-            @PathVariable int venueId
-    ) {
-        return ResponseEntity.ok(
-                ticketService.countWithVenueLessThan(venueId)
-        );
+    public ResponseEntity<Long> countWithVenueLessThan(@PathVariable int venueId) {
+        return ResponseEntity.ok(ticketService.countWithVenueLessThan(venueId));
     }
-
 
     @GetMapping("/unique-venues")
     public ResponseEntity<List<VenueResponse>> getUniqueVenues() {
-        return ResponseEntity.ok(
-                ticketService.getUniqueVenues()
-        );
+        return ResponseEntity.ok(ticketService.getUniqueVenues());
     }
-
 
     @PostMapping("/{id}/copy-vip")
-    public ResponseEntity<TicketResponse> copyAsVip(
-            @PathVariable int id
-    ) {
-        var ticket = ticketService.copyAsVip(id);
-
-        if (ticket == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(ticket);
+    public ResponseEntity<TicketResponse> copyAsVip(@PathVariable int id) {
+        return ResponseEntity.ok(ticketService.copyAsVip(id));
     }
-
 
     @PostMapping("/{id}/copy-with-discount")
     public ResponseEntity<TicketResponse> copyWithDiscount(
             @PathVariable int id,
             @RequestParam int discount
     ) {
-        var ticket = ticketService.copyWithDiscount(
-                id,
-                discount
-        );
-
-        if (ticket == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(ticket);
+        return ResponseEntity.ok(ticketService.copyWithDiscount(id, discount));
     }
 }

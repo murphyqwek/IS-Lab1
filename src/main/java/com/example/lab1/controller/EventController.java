@@ -31,26 +31,18 @@ public class EventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventResponse create(
-            @Valid @RequestBody EventRequest request
-    ) {
+    public EventResponse create(@Valid @RequestBody EventRequest request) {
         return service.create(request);
     }
 
     @PutMapping("/{id}")
-    public EventResponse update(
-            @PathVariable Integer id,
-            @Valid @RequestBody EventRequest request
-    ) {
+    public EventResponse update(@PathVariable Integer id, @Valid @RequestBody EventRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable Integer id,
-            @RequestParam(required = false) Integer replacementId
-    ) {
+    public void delete(@PathVariable Integer id, @RequestParam(required = false) Integer replacementId) {
         service.delete(id, replacementId);
     }
 }

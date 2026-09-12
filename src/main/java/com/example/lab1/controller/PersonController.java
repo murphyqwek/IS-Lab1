@@ -31,26 +31,18 @@ public class PersonController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PersonResponse create(
-            @Valid @RequestBody PersonRequest request
-    ) {
+    public PersonResponse create(@Valid @RequestBody PersonRequest request) {
         return service.create(request);
     }
 
     @PutMapping("/{id}")
-    public PersonResponse update(
-            @PathVariable Long id,
-            @Valid @RequestBody PersonRequest request
-    ) {
+    public PersonResponse update(@PathVariable Long id, @Valid @RequestBody PersonRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable Long id,
-            @RequestParam(required = false) Long replacementId
-    ) {
+    public void delete(@PathVariable Long id, @RequestParam(required = false) Long replacementId) {
         service.delete(id, replacementId);
     }
 }
