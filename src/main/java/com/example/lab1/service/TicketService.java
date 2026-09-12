@@ -4,9 +4,11 @@ import com.example.lab1.dto.filter.TicketFilter;
 import com.example.lab1.dto.filter.TicketSortField;
 import com.example.lab1.dto.request.TicketRequest;
 import com.example.lab1.dto.response.TicketResponse;
+import com.example.lab1.dto.response.VenueResponse;
 import com.example.lab1.entity.Ticket;
 import com.example.lab1.exception.ResourceNotFoundException;
 import com.example.lab1.mapper.TicketMapper;
+import com.example.lab1.mapper.VenueMapper;
 import com.example.lab1.repository.TicketRepository;
 import com.example.lab1.specification.TicketSpecification;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class TicketService {
 
@@ -26,14 +30,61 @@ public class TicketService {
     private final EventService eventService;
     private final VenueService venueService;
     private final TicketMapper ticketMapper;
+    private final VenueMapper venueMapper;
 
-    public TicketService(TicketRepository ticketRepository, CoordinatesService coordinatesService, PersonService personService, EventService eventService, VenueService venueService, TicketMapper ticketMapper) {
+    public TicketService(TicketRepository ticketRepository,
+                         CoordinatesService coordinatesService,
+                         PersonService personService,
+                         EventService eventService,
+                         VenueService venueService,
+                         TicketMapper ticketMapper,
+                         VenueMapper venueMapper) {
         this.ticketRepository = ticketRepository;
         this.coordinatesService = coordinatesService;
         this.personService = personService;
         this.eventService = eventService;
         this.venueService = venueService;
         this.ticketMapper = ticketMapper;
+        this.venueMapper = venueMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public TicketResponse getTicketWithMaxType() {
+        return ticketRepository.findTicketWithMaxType()
+                .map(ticketMapper::toResponse)
+                .orElse(null);
+    }
+
+
+    @Transactional(readOnly = true)
+    public long countWithVenueLessThan(int venueId) {
+        return ticketRepository.countWithVenueLessThan(venueId);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<VenueResponse> getUniqueVenues() {
+        return ticketRepository.findUniqueVenues()
+                .stream()
+                .map(venueMapper::toResponse)
+                .toList();
+    }
+
+
+    @Transactional
+    public TicketResponse copyAsVip(int ticketId) {
+        return ticketRepository.copyAsVip(ticketId)
+                .map(ticketMapper::toResponse)
+                .orElse(null);
+    }
+
+
+    @Transactional
+    public TicketResponse copyWithDiscount(int ticketId, int discount) {
+        return ticketRepository
+                .copyWithDiscount(ticketId, discount)
+                .map(ticketMapper::toResponse)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)

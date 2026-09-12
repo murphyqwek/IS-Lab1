@@ -4,14 +4,16 @@ import com.example.lab1.dto.filter.TicketFilter;
 import com.example.lab1.dto.filter.TicketSortField;
 import com.example.lab1.dto.request.TicketRequest;
 import com.example.lab1.dto.response.TicketResponse;
+import com.example.lab1.dto.response.VenueResponse;
 import com.example.lab1.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -67,5 +69,66 @@ public class TicketController {
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/max-type")
+    public ResponseEntity<TicketResponse> getWithMaxType() {
+        var ticket = ticketService.getTicketWithMaxType();
+
+        if (ticket == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ticket);
+    }
+
+
+    @GetMapping("/venue-less-than/{venueId}/count")
+    public ResponseEntity<Long> countWithVenueLessThan(
+            @PathVariable int venueId
+    ) {
+        return ResponseEntity.ok(
+                ticketService.countWithVenueLessThan(venueId)
+        );
+    }
+
+
+    @GetMapping("/unique-venues")
+    public ResponseEntity<List<VenueResponse>> getUniqueVenues() {
+        return ResponseEntity.ok(
+                ticketService.getUniqueVenues()
+        );
+    }
+
+
+    @PostMapping("/{id}/copy-vip")
+    public ResponseEntity<TicketResponse> copyAsVip(
+            @PathVariable int id
+    ) {
+        var ticket = ticketService.copyAsVip(id);
+
+        if (ticket == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ticket);
+    }
+
+
+    @PostMapping("/{id}/copy-with-discount")
+    public ResponseEntity<TicketResponse> copyWithDiscount(
+            @PathVariable int id,
+            @RequestParam int discount
+    ) {
+        var ticket = ticketService.copyWithDiscount(
+                id,
+                discount
+        );
+
+        if (ticket == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ticket);
     }
 }
