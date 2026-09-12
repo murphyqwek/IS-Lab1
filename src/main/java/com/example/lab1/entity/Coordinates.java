@@ -13,6 +13,7 @@ public class Coordinates {
     @Column(nullable = false)
     private Double x;
 
+    @NotNull
     @Column(nullable = false)
     private double y;
 

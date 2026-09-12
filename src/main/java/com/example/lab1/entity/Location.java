@@ -10,12 +10,15 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @Column(nullable = false)
     private float x;
 
+    @NotNull
     @Column(nullable = false)
     private long y;
 
+    @NotNull
     @Column(nullable = false)
     private Long z;
 

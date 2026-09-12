@@ -2,6 +2,7 @@ package com.example.lab1.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 @Entity
 public class Venue {
@@ -10,6 +11,7 @@ public class Venue {
     private Integer id;
 
     @NotBlank
+    @NotNull
     @Column(nullable = false,
             check = @CheckConstraint(
                     name = "check_venue_name_not_blank",
@@ -17,6 +19,7 @@ public class Venue {
     private String name;
 
     @Positive
+    @NotNull
     @Column(nullable = false,
             check = @CheckConstraint(
                     name = "check_capacity_positive",

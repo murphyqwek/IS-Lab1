@@ -11,6 +11,7 @@ public class Event {
     private Integer id;
 
     @NotBlank
+    @NotNull
     @Column(nullable = false,
             check = @CheckConstraint(
                     name = "check_event_name_not_blank",
