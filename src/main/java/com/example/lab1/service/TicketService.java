@@ -11,6 +11,10 @@ import com.example.lab1.mapper.TicketMapper;
 import com.example.lab1.mapper.VenueMapper;
 import com.example.lab1.repository.TicketRepository;
 import com.example.lab1.specification.TicketSpecification;
+import com.example.lab1.websocket.ChangeType;
+import com.example.lab1.websocket.EntityChangedEvent;
+import com.example.lab1.websocket.EntityType;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,14 +35,18 @@ public class TicketService {
     private final VenueService venueService;
     private final TicketMapper ticketMapper;
     private final VenueMapper venueMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TicketService(TicketRepository ticketRepository,
-                         CoordinatesService coordinatesService,
-                         PersonService personService,
-                         EventService eventService,
-                         VenueService venueService,
-                         TicketMapper ticketMapper,
-                         VenueMapper venueMapper) {
+    public TicketService(
+            TicketRepository ticketRepository,
+            CoordinatesService coordinatesService,
+            PersonService personService,
+            EventService eventService,
+            VenueService venueService,
+            TicketMapper ticketMapper,
+            VenueMapper venueMapper,
+            ApplicationEventPublisher eventPublisher
+    ) {
         this.ticketRepository = ticketRepository;
         this.coordinatesService = coordinatesService;
         this.personService = personService;
@@ -46,45 +54,51 @@ public class TicketService {
         this.venueService = venueService;
         this.ticketMapper = ticketMapper;
         this.venueMapper = venueMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
     public TicketResponse getTicketWithMaxType() {
-        return ticketRepository.findTicketWithMaxType()
-                .map(ticketMapper::toResponse)
-                .orElse(null);
+        return ticketRepository.findTicketWithMaxType().map(ticketMapper::toResponse).orElse(null);
     }
-
 
     @Transactional(readOnly = true)
     public long countWithVenueLessThan(int venueId) {
         return ticketRepository.countWithVenueLessThan(venueId);
     }
 
-
     @Transactional(readOnly = true)
     public List<VenueResponse> getUniqueVenues() {
-        return ticketRepository.findUniqueVenues()
-                .stream()
-                .map(venueMapper::toResponse)
-                .toList();
+        return ticketRepository.findUniqueVenues().stream().map(venueMapper::toResponse).toList();
     }
-
 
     @Transactional
     public TicketResponse copyAsVip(int ticketId) {
-        return ticketRepository.copyAsVip(ticketId)
-                .map(ticketMapper::toResponse)
-                .orElse(null);
-    }
+        Ticket ticket = ticketRepository.copyAsVip(ticketId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Ticket с id=" + ticketId + " не найден"
+                        )
+                );
 
+        publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
+
+        return ticketMapper.toResponse(ticket);
+    }
 
     @Transactional
     public TicketResponse copyWithDiscount(int ticketId, int discount) {
-        return ticketRepository
+        Ticket ticket = ticketRepository
                 .copyWithDiscount(ticketId, discount)
-                .map(ticketMapper::toResponse)
-                .orElse(null);
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Ticket с id=" + ticketId + " не найден"
+                        )
+                );
+
+        publish(EntityType.TICKET, ChangeType.CREATED, ticket.getId());
+
+        return ticketMapper.toResponse(ticket);
     }
 
     @Transactional(readOnly = true)
@@ -97,35 +111,20 @@ public class TicketService {
         Specification<Ticket> specification = Specification.unrestricted();
 
         if (filter.name() != null && !filter.name().isBlank()) {
-            specification = specification.and(
-                    TicketSpecification.nameEquals(
-                            filter.name()
-                    )
-            );
+            specification = specification.and(TicketSpecification.nameEquals(filter.name()));
         }
 
         if (filter.eventName() != null && !filter.eventName().isBlank()) {
-            specification = specification.and(
-                    TicketSpecification.eventNameEquals(
-                            filter.eventName()
-                    )
-            );
+
+            specification = specification.and(TicketSpecification.eventNameEquals(filter.eventName()));
         }
 
         if (filter.eventDescription() != null && !filter.eventDescription().isBlank()) {
-            specification = specification.and(
-                    TicketSpecification.eventDescriptionEquals(
-                            filter.eventDescription()
-                    )
-            );
+            specification = specification.and(TicketSpecification.eventDescriptionEquals(filter.eventDescription()));
         }
 
         if (filter.venueName() != null && !filter.venueName().isBlank()) {
-            specification = specification.and(
-                    TicketSpecification.venueNameEquals(
-                            filter.venueName()
-                    )
-            );
+            specification = specification.and(TicketSpecification.venueNameEquals(filter.venueName()));
         }
 
         Sort sort = Sort.by(direction, sortBy.getProperty());
@@ -138,11 +137,14 @@ public class TicketService {
     @Transactional
     public TicketResponse create(TicketRequest request) {
         Ticket ticket = new Ticket();
+
         applyRequest(ticket, request);
 
-        ticketRepository.save(ticket);
+        Ticket savedTicket = ticketRepository.save(ticket);
 
-        return ticketMapper.toResponse(ticket);
+        publish(EntityType.TICKET, ChangeType.CREATED, savedTicket.getId());
+
+        return ticketMapper.toResponse(savedTicket);
     }
 
     @Transactional
@@ -151,31 +153,30 @@ public class TicketService {
 
         applyRequest(ticket, request);
 
-        // save() не нужен: ticket managed, Hibernate применит dirty checking.
+        publish(EntityType.TICKET, ChangeType.UPDATED, ticket.getId());
+
         return ticketMapper.toResponse(ticket);
     }
 
     @Transactional
     public void delete(Integer id) {
-        ticketRepository.delete(find(id));
+        Ticket ticket = find(id);
+
+        ticketRepository.delete(ticket);
+
+        publish(EntityType.TICKET, ChangeType.DELETED, id);
     }
 
     private void applyRequest(Ticket ticket, TicketRequest request) {
         ticket.setName(request.name());
+
         ticket.setCoordinates(coordinatesService.resolve(request.coordinates()));
+
         ticket.setEvent(eventService.resolve(request.event()));
 
-        ticket.setPerson(
-                request.person() == null
-                        ? null
-                        : personService.resolve(request.person())
-        );
+        ticket.setPerson(request.person() == null ? null : personService.resolve(request.person()));
 
-        ticket.setVenue(
-                request.venue() == null
-                        ? null
-                        : venueService.resolve(request.venue())
-        );
+        ticket.setVenue(request.venue() == null ? null : venueService.resolve(request.venue()));
 
         ticket.setPrice(request.price());
         ticket.setType(request.ticketType());
@@ -187,8 +188,12 @@ public class TicketService {
         return ticketRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Ticket с id=" + id + " не найден"
+                                "Ticket с id=" + id +" не найден"
                         )
                 );
+    }
+
+    private void publish(EntityType entityType, ChangeType changeType, Integer id) {
+        eventPublisher.publishEvent(new EntityChangedEvent(entityType, changeType, id));
     }
 }

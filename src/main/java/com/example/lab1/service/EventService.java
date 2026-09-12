@@ -1,93 +1,63 @@
 package com.example.lab1.service;
 
-import com.example.lab1.dto.request.EventReferenceRequest;
 import com.example.lab1.dto.request.EventRequest;
-import com.example.lab1.dto.response.EventResponse;
 import com.example.lab1.entity.Event;
 import com.example.lab1.exception.ResourceNotFoundException;
 import com.example.lab1.mapper.EventMapper;
 import com.example.lab1.repository.EventRepository;
-import com.example.lab1.repository.TicketRepository;
+import com.example.lab1.websocket.ChangeType;
+import com.example.lab1.websocket.EntityChangePublisher;
+import com.example.lab1.websocket.EntityType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class EventService {
 
-    private final EventRepository repository;
-    private final TicketRepository ticketRepository;
-    private final EventMapper mapper;
+    private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
+    private final EntityChangePublisher changePublisher;
 
-    public EventService(EventRepository repository, TicketRepository ticketRepository, EventMapper mapper) {
-        this.repository = repository;
-        this.ticketRepository = ticketRepository;
-        this.mapper = mapper;
-    }
-
-    @Transactional(readOnly = true)
-    public List<EventResponse> getAll() {
-        return repository.findAll().stream().map(mapper::toResponse).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public EventResponse getById(Integer id) {
-        return mapper.toResponse(find(id));
+    public EventService(
+            EventRepository eventRepository,
+            EventMapper eventMapper,
+            EntityChangePublisher changePublisher
+    ) {
+        this.eventRepository = eventRepository;
+        this.eventMapper = eventMapper;
+        this.changePublisher = changePublisher;
     }
 
     @Transactional
-    public EventResponse create(EventRequest request) {
-        Event event = createEntity(request);
-        return mapper.toResponse(event);
+    public Event resolve(EventRequest request) {
+        Event event = eventMapper.toEntity(request);
+        return eventRepository.save(event);
     }
 
     @Transactional
-    public EventResponse update(Integer id, EventRequest request) {
+    public Event update(Integer id, EventRequest request) {
         Event event = find(id);
 
         event.setName(request.name());
         event.setDescription(request.description());
         event.setEventType(request.eventType());
 
-        return mapper.toResponse(event);
+        changePublisher.publish(EntityType.EVENT, ChangeType.UPDATED, id);
+
+        return event;
     }
 
     @Transactional
-    public void delete(Integer id, Integer replacementId) {
+    public void delete(Integer id) {
         Event event = find(id);
-        var tickets = ticketRepository.findAllByEvent_Id(id);
 
-        if (!tickets.isEmpty()) {
-            ReferenceRequestValidator.requireReplacement(replacementId, "Event");
-            ReferenceRequestValidator.requireDifferent(id, replacementId, "Event");
+        eventRepository.delete(event);
 
-            Event replacement = find(replacementId);
-            tickets.forEach(ticket -> ticket.setEvent(replacement));
-        }
-
-        repository.delete(event);
-    }
-
-    @Transactional
-    public Event resolve(EventReferenceRequest request) {
-        ReferenceRequestValidator.requireExactlyOne(
-                request.id(),
-                request.newObject(),
-                "event"
-        );
-
-        return request.id() != null
-                ? find(request.id())
-                : createEntity(request.newObject());
-    }
-
-    private Event createEntity(EventRequest request) {
-        return repository.save(mapper.toEntity(request));
+        changePublisher.publish(EntityType.EVENT, ChangeType.DELETED, id);
     }
 
     private Event find(Integer id) {
-        return repository.findById(id)
+        return eventRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Event с id=" + id + " не найден"
