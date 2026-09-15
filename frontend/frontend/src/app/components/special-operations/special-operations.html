@@ -7,7 +7,7 @@
     <section class="card">
       <div class="card-head">Максимальный Ticket.type</div>
       <div class="card-body">
-        <p>Вернуть один любой объект, значение поля type которого максимально.</p>
+        <p>Вернуть один любой объект, значение поля type которого максимально</p>
         <button class="black-btn" (click)="maxType()">Выполнить</button>
       </div>
     </section>
@@ -15,7 +15,7 @@
     <section class="card">
       <div class="card-head">Количество по Venue</div>
       <div class="card-body">
-        <p>Вернуть количество билетов, значение venue которых меньше заданного.</p>
+        <p>Вернуть количество билетов, значение venue которых меньше заданного</p>
         <label>Venue ID<input [(ngModel)]="venueId" name="venueId" type="number" min="1" /></label>
         <button class="black-btn" (click)="countVenueLess()">Посчитать</button>
       </div>
@@ -24,7 +24,7 @@
     <section class="card">
       <div class="card-head">Уникальные Venue</div>
       <div class="card-body">
-        <p>Вернуть массив уникальных значений поля venue.</p>
+        <p>Вернуть массив уникальных значений поля venue</p>
         <button class="black-btn" (click)="uniqueVenues()">Получить</button>
       </div>
     </section>
@@ -32,7 +32,7 @@
     <section class="card">
       <div class="card-head">Копия VIP ×2</div>
       <div class="card-body">
-        <p>Скопировать билет, сделать категорию VIP и удвоить цену.</p>
+        <p>Скопировать билет, сделать категорию VIP и удвоить цену</p>
         <label>Ticket ID<input [(ngModel)]="vipTicketId" name="vipTicketId" type="number" min="1" /></label>
         <button class="black-btn" (click)="copyVip()">Создать копию</button>
       </div>
@@ -42,7 +42,7 @@
       <div class="card-head">Копия со скидкой</div>
       <div class="card-body inline-form">
         <div>
-          <p>Создать билет на основе указанного, задать скидку и увеличить цену на ту же сумму.</p>
+          <p>Создать билет на основе указанного, задать скидку и увеличить цену на ту же сумму</p>
         </div>
         <label>Ticket ID<input [(ngModel)]="discountTicketId" name="discountTicketId" type="number" min="1" /></label>
         <label>Discount, %<input [(ngModel)]="discount" name="discount" type="number" min="1" max="100" /></label>

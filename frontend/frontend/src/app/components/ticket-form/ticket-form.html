@@ -3,7 +3,7 @@
     <div class="dialog-head">
       <div>
         <h2>{{ ticket ? 'Редактирование билета #' + ticket.id : 'Новый билет' }}</h2>
-        <p>Связанные сущности можно выбрать из существующих либо создать вместе с билетом.</p>
+        <p>Связанные сущности можно выбрать из существующих либо создать вместе с билетом</p>
       </div>
       <button class="icon-btn" type="button" (click)="cancelled.emit()">×</button>
     </div>
@@ -117,7 +117,7 @@
           <label class="wide">
             Person
             <select [(ngModel)]="personId" name="personId">
-              <option [ngValue]="null">— выбери —</option>
+              <option [ngValue]="null">— выберите —</option>
               @for (item of references.persons; track item.id) {
                 <option [ngValue]="item.id">#{{ item.id }} — {{ item.nationality || 'без nationality' }}, {{ item.weight ?? '—' }} kg</option>
               }
@@ -161,7 +161,7 @@
               <label class="wide">
                 Location
                 <select [(ngModel)]="locationId" name="locationId">
-                  <option [ngValue]="null">— выбери —</option>
+                  <option [ngValue]="null">— выберите —</option>
                   @for (item of references.locations; track item.id) {
                     <option [ngValue]="item.id">#{{ item.id }} — {{ item.name || 'без имени' }} ({{ item.x }}, {{ item.y }}, {{ item.z }})</option>
                   }

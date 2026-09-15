@@ -114,7 +114,7 @@
       <div class="dialog-head"><h2>Удаление {{ deleteType }}</h2><button type="button" (click)="closeDelete()">×</button></div>
       <div class="dialog-body">
         <p>Удалить {{ entityLabel(deleteEntity) }}?</p>
-        <p class="hint">Если объект используется, выбери замену. Backend перепривяжет связанные объекты перед удалением.</p>
+        <p class="hint">Если объект используется, выберите замену</p>
         <label>Replacement<select [(ngModel)]="replacementId" name="replacementId"><option [ngValue]="null">— без замены —</option>@for (item of replacementCandidates(); track item.id) { <option [ngValue]="item.id">{{ entityLabel(item) }}</option> }</select></label>
       </div>
       <div class="dialog-actions"><button class="outline" (click)="closeDelete()">Отмена</button><button class="delete-confirm" (click)="confirmDelete()">Удалить</button></div>

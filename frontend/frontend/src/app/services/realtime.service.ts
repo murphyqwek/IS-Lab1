@@ -5,7 +5,6 @@ import { EntityChangedEvent } from '../models/ticket.models';
 
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
-  readonly connected = signal(false);
   readonly lastChange = signal<EntityChangedEvent | null>(null);
 
   private readonly client: Client;
@@ -21,13 +20,8 @@ export class RealtimeService {
     });
 
     this.client.onConnect = () => {
-      this.connected.set(true);
       this.client.subscribe(API_CONFIG.websocketTopic, (message: IMessage) => this.handleMessage(message));
     };
-
-    this.client.onDisconnect = () => this.connected.set(false);
-    this.client.onWebSocketClose = () => this.connected.set(false);
-    this.client.onStompError = () => this.connected.set(false);
 
     this.client.activate();
   }
